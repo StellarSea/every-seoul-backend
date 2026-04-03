@@ -72,3 +72,19 @@ async def fetch_range_data(service_name: str, start_idx: int, end_idx: int) -> l
             all_rows.extend(result[service_name].get("row", []))
             
     return all_rows
+
+async def collect_sDoTEnv(start_idx: int, end_idx: int) -> list[SDoTEnvRow]:
+    """스마트서울 도시데이터 센서(S-DoT) 환경정보 (실시간) 수집 및 구조화"""
+    service_name = "sDoTEnv"
+    raw_data = await fetch_range_data(service_name, start_idx, end_idx)
+
+    processed_data = []
+    for row in raw_data:
+        try:
+            sensor_data = SDoTEnvRow(**row)
+            processed_data.append(sensor_data)
+        except Exception as e:
+            logger.warning(f"S-DoT 불량 센서 데이터 스킵 - 사유: {e}")
+            continue
+            
+    return processed_data
